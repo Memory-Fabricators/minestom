@@ -119,7 +119,7 @@ import java.util.function.UnaryOperator;
  * <p>
  * You can easily create your own implementation of this and use it with {@link ConnectionManager#setPlayerProvider(PlayerProvider)}.
  */
-public class Player extends LivingEntity implements CommandSender, Localizable, HoverEventSource<ShowEntity>, Identified, NamedAndIdentified {
+public class Player extends EntityCreature implements CommandSender, Localizable, HoverEventSource<ShowEntity>, Identified, NamedAndIdentified {
     private static final Logger logger = LoggerFactory.getLogger(Player.class);
 
     private static final DynamicRegistry<DimensionType> DIMENSION_TYPE_REGISTRY = MinecraftServer.getDimensionTypeRegistry();
@@ -1526,6 +1526,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable, 
      * @param packet the packet to send
      */
     public void sendPacket(@NotNull SendablePacket packet) {
+        if (playerConnection == null) {
+            return;
+        }
+
         this.playerConnection.sendPacket(packet);
     }
 
