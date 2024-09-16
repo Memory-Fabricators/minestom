@@ -114,72 +114,37 @@ tasks {
         replaceToken("\"&ARTIFACT\"", if (artifact == null) "null" else "\"${artifact}\"", gitFile)
     }
 
-    nexusPublishing{
-        useStaging.set(true)
-        this.packageGroup.set("net.minestom")
-
-        transitionCheckOptions {
-            maxRetries.set(360) // 1 hour
-            delayBetween.set(Duration.ofSeconds(10))
+    publishing {
+        repositories {
+            maven {
+                name = "Github Packages"
+                url = uri("https://maven.pkg.github.com/Memory-Fabricators/minestom")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
         }
 
-        repositories.sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        publications.create<MavenPublication>("maven") {
+            groupId = "net.minestom"
+            // todo: decide on publishing scheme
+            artifactId = if (channel == "snapshot") "minestom-snapshots" else "minestom-snapshots"
+            version = project.version.toString()
 
-            if (System.getenv("SONATYPE_USERNAME") != null) {
-                username.set(System.getenv("SONATYPE_USERNAME"))
-                password.set(System.getenv("SONATYPE_PASSWORD"))
-            }
-        }
-    }
+            from(project.components["java"])
 
-    publishing.publications.create<MavenPublication>("maven") {
-        groupId = "net.minestom"
-        // todo: decide on publishing scheme
-        artifactId = if (channel == "snapshot") "minestom-snapshots" else "minestom-snapshots"
-        version = project.version.toString()
-
-        from(project.components["java"])
-
-        pom {
-            name.set(this@create.artifactId)
-            description.set(shortDescription)
-            url.set("https://github.com/minestom/minestom")
-
-            licenses {
-                license {
-                    name.set("Apache 2.0")
-                    url.set("https://github.com/minestom/minestom/blob/main/LICENSE")
-                }
-            }
-
-            developers {
-                developer {
-                    id.set("TheMode")
-                }
-                developer {
-                    id.set("mworzala")
-                    name.set("Matt Worzala")
-                    email.set("matt@hollowcube.dev")
-                }
-            }
-
-            issueManagement {
-                system.set("GitHub")
-                url.set("https://github.com/minestom/minestom/issues")
-            }
-
-            scm {
-                connection.set("scm:git:git://github.com/minestom/minestom.git")
-                developerConnection.set("scm:git:git@github.com:minestom/minestom.git")
+            pom {
+                name.set(this@create.artifactId)
+                description.set(shortDescription)
                 url.set("https://github.com/minestom/minestom")
-                tag.set("HEAD")
-            }
 
-            ciManagement {
-                system.set("Github Actions")
-                url.set("https://github.com/minestom/minestom/actions")
+                licenses {
+                    license {
+                        name.set("Apache 2.0")
+                        url.set("https://github.com/minestom/minestom/blob/main/LICENSE")
+                    }
+                }
             }
         }
     }
